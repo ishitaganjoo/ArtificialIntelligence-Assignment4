@@ -7,6 +7,9 @@ class spamClassification:
 	
 	def createDictionary(self):
 		countSpam,countNSpam = 0,0
+	#countSpam,countNSpam = 0,0
+	#priorSpam,priorNSpam= 0,0
+		priorSpam,priorNSpam= 0.0,0.0
 		dirNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
 		dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
 		notSpamDict = {}
