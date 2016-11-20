@@ -2,11 +2,11 @@ import os
 
 class spamClassification:
 	def __init__(self):
-		self.priorSpam = 0
-        self.priorNSpam = 0
+		self.priorSpam = 0.0
+        	self.priorNSpam = 0.0
 	
 	def createDictionary(self):
-		countSpam,countNSpam = 0,0
+		countSpam,countNSpam = 0.0,0.0
 	#countSpam,countNSpam = 0,0
 	#priorSpam,priorNSpam= 0,0
 		priorSpam,priorNSpam= 0.0,0.0
