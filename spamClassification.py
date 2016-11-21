@@ -89,7 +89,7 @@ class spamClassification:
 						print(float(value[1]))
 						print(float(countSpam))
 						print(float(value[1])/float(countSpam))
-						probSpam = float(probSpam) * float(float(value[1])/float(countSpam))
+						probSpam = float(probSpam) * (float(value[1])/float(countSpam))
 						print("inside", probSpam)
 					else:
 						probSpam *= 1e-2
