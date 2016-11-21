@@ -7,8 +7,6 @@ class spamClassification:
 	
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
-	#countSpam,countNSpam = 0,0
-	#priorSpam,priorNSpam= 0,0
 		priorSpam,priorNSpam= 0.0,0.0
 		dirNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
 		dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
@@ -23,11 +21,22 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
+			wordsPerMail = []
 			for eachWord in mail:
 				if (notSpamDict.get(eachWord) != None):
-					notSpamDict[eachWord] += 1
+					value = notSpamDict[eachWord]
+					value[0] += 1
+					notSpamDict[eachWord] = value
 				else:
-					notSpamDict[eachWord] = 1
+					notSpamDict[eachWord] = [1,0]
+			for eachWord in mail:
+				if eachWord not in wordsPerMail:
+					wordsPerMail.append(eachWord)
+			while wordsPerMail:
+				word = wordsPerMail.pop()
+				value = notSpamDict[word]
+				value[1] += 1
+				notSpamDict[word] = value
 
 		mailList = []
 		for fileName in dirSpam:
@@ -37,15 +46,55 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
+			wordsPerMail = []
 			for eachWord in mail:
 				if(spamDict.get(eachWord) != None):
-					spamDict[eachWord] += 1
+					value = spamDict[eachWord]
+					value[0] += 1
+					spamDict[eachWord] = value
 				else:
-					spamDict[eachWord] = 1
+					spamDict[eachWord] = [1,0]
+			for eachWord in mail:
+				if eachWord not in wordsPerMail:
+					wordsPerMail.append(eachWord)
+			while wordsPerMail:
+				word = wordsPerMail.pop()
+				value = spamDict[word]
+				value[1] += 1
+				spamDict[word] = value 
+
 		self.priorSpam = countSpam/(countSpam+countNSpam)
-		self.priorNSpam = countNSpam/(countSpam+countNSpam)			
+		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		print("prior Spam",self.priorSpam)
 		print("prior Non Spam",self.priorNSpam)
+		#print(notSpamDict)
+		self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
+
+	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
+		mailList = []
+		wordList = []
+		probSpam = 1.0
+		dirTestSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+		for fileName in dirTestSpam:
+			wordList= []
+			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
+				content = f.readlines()
+				newStr = "".join(content)
+				mailList.append(newStr.split(' '))
+				for eachWord in mailList[0]:
+					wordList.append(eachWord)
+				for eachWord in wordList:
+					if(spamDict.get(eachWord) != None):
+						value = spamDict[eachWord]
+						print(float(value[1]))
+						print(float(countSpam))
+						print(float(value[1])/float(countSpam))
+						probSpam = float(probSpam) * float(float(value[1])/float(countSpam))
+						print("inside", probSpam)
+					else:
+						probSpam *= 1e-2
+				probSpam *= priorNSpam
 		
 spamObj = spamClassification()
 spamObj.createDictionary()
+#spamObj.calculateNaiveBayes()
