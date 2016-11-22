@@ -3,7 +3,9 @@ import os
 class spamClassification:
 	def __init__(self):
 		self.priorSpam = 0.0
-        	self.priorNSpam = 0.0
+        self.priorNSpam = 0.0
+        self.sortedSpamList =[]
+        self.sortedNSpamList =[]
 	
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -12,6 +14,7 @@ class spamClassification:
 		dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
 		notSpamDict = {}
 		spamDict = {}
+		
 		mailList= []
 		
 		for fileName in dirNSpam:
@@ -21,22 +24,12 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
-			wordsPerMail = []
 			for eachWord in mail:
 				if (notSpamDict.get(eachWord) != None):
-					value = notSpamDict[eachWord]
-					value[0] += 1
-					notSpamDict[eachWord] = value
+					notSpamDict[eachWord] +=1
 				else:
-					notSpamDict[eachWord] = [1,0]
-			for eachWord in mail:
-				if eachWord not in wordsPerMail:
-					wordsPerMail.append(eachWord)
-			while wordsPerMail:
-				word = wordsPerMail.pop()
-				value = notSpamDict[word]
-				value[1] += 1
-				notSpamDict[word] = value
+					notSpamDict[eachWord] = 1
+			
 
 		mailList = []
 		for fileName in dirSpam:
@@ -46,27 +39,25 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
-			wordsPerMail = []
 			for eachWord in mail:
 				if(spamDict.get(eachWord) != None):
-					value = spamDict[eachWord]
-					value[0] += 1
-					spamDict[eachWord] = value
+					spamDict[eachWord] +=1
 				else:
-					spamDict[eachWord] = [1,0]
-			for eachWord in mail:
-				if eachWord not in wordsPerMail:
-					wordsPerMail.append(eachWord)
-			while wordsPerMail:
-				word = wordsPerMail.pop()
-				value = spamDict[word]
-				value[1] += 1
-				spamDict[word] = value 
+					spamDict[eachWord] = 1
+			
 
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		print("prior Spam",self.priorSpam)
 		print("prior Non Spam",self.priorNSpam)
+		
+		#pick top 50 words from spamDict and non spam Dict
+		self.sortedSpamList = sorted(spamDict, key=spamDict.get)
+		print "sorted list is",self.sortedSpamList
+		
+		self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
+		print "sorted list is",self.sortedNSpamList
+		#combine and select top 50 in both, make a table with rows as docs and columns as words.
 		#print(notSpamDict)
 		self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
@@ -94,7 +85,12 @@ class spamClassification:
 					else:
 						probSpam *= 1e-2
 				probSpam *= priorNSpam
+	
+	
+	def decisionTree(self):
+		#
 		
+		print "in decision tree"	
 spamObj = spamClassification()
 spamObj.createDictionary()
 #spamObj.calculateNaiveBayes()
