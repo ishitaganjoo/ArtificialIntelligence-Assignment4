@@ -3,9 +3,9 @@ import os
 class spamClassification:
 	def __init__(self):
 		self.priorSpam = 0.0
-        self.priorNSpam = 0.0
-        self.sortedSpamList =[]
-        self.sortedNSpamList =[]
+        	self.priorNSpam = 0.0
+        	self.sortedSpamList =[]
+        	self.sortedNSpamList =[]
 	
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -52,14 +52,15 @@ class spamClassification:
 		print("prior Non Spam",self.priorNSpam)
 		
 		#pick top 50 words from spamDict and non spam Dict
-		self.sortedSpamList = sorted(spamDict, key=spamDict.get)
+		#self.sortedSpamList = sorted(spamDict, key=spamDict.get)
+		self.sortedSpamList = sorted(spamDict.values())
 		print "sorted list is",self.sortedSpamList
 		
-		self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
-		print "sorted list is",self.sortedNSpamList
+		#self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
+		#print "sorted list is",self.sortedNSpamList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
 		#print(notSpamDict)
-		self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
+		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
 		mailList = []
