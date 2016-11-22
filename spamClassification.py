@@ -1,4 +1,5 @@
 import os
+from _collections import defaultdict
 
 class spamClassification:
 	def __init__(self):
@@ -6,6 +7,8 @@ class spamClassification:
         	self.priorNSpam = 0.0
         	self.sortedSpamList =[]
         	self.sortedNSpamList =[]
+        	self.spamMostFreq = []
+        	self.nonSpamMostFreq = []
 	
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -17,6 +20,8 @@ class spamClassification:
 		
 		mailList= []
 		
+		allWords = defaultdict(int)
+				
 		for fileName in dirNSpam:
 			countNSpam += 1
 			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam/"+fileName, "r") as f:
@@ -29,6 +34,7 @@ class spamClassification:
 					notSpamDict[eachWord] +=1
 				else:
 					notSpamDict[eachWord] = 1
+				allWords[eachWord] += 1
 			
 
 		mailList = []
@@ -44,7 +50,7 @@ class spamClassification:
 					spamDict[eachWord] +=1
 				else:
 					spamDict[eachWord] = 1
-			
+				allWords[eachWord] += 1
 
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
@@ -52,13 +58,17 @@ class spamClassification:
 		print("prior Non Spam",self.priorNSpam)
 		
 		#pick top 50 words from spamDict and non spam Dict
-		#self.sortedSpamList = sorted(spamDict, key=spamDict.get)
-		self.sortedSpamList = sorted(spamDict.values())
+		self.sortedSpamList = sorted(spamDict, key=spamDict.get)
 		print "sorted list is",self.sortedSpamList
 		
-		#self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
-		#print "sorted list is",self.sortedNSpamList
+		self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
+		print "sorted list is",self.sortedNSpamList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
+		for i in range(len(self.sortedSpamList)-1, len(self.sortedSpamList)-49, -1):
+			self.spamMostFreq.append(self.sortedSpamList[i])
+			
+		for i in range(len(self.sortedNSpamList)-1, len(self.sortedNSpamList)-49, -1):
+			self.nonSpamMostFreq.append(self.sortedNSpamList[i])
 		#print(notSpamDict)
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
