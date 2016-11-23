@@ -54,15 +54,17 @@ class spamClassification:
 
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
-		print("prior Spam",self.priorSpam)
-		print("prior Non Spam",self.priorNSpam)
+		#print("prior Spam",self.priorSpam)
+		#print("prior Non Spam",self.priorNSpam)
 		
 		#pick top 50 words from spamDict and non spam Dict
 		self.sortedSpamList = sorted(spamDict, key=spamDict.get)
-		print "sorted list is",self.sortedSpamList
+		#print "sorted list is",self.sortedSpamList
 		
 		self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
-		print "sorted list is",self.sortedNSpamList
+		#print "sorted list is",self.sortedNSpamList
+
+		print "ANAND",spamDict["the"],notSpamDict["the"],allWords["the"]
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
 		for i in range(len(self.sortedSpamList)-1, len(self.sortedSpamList)-49, -1):
 			self.spamMostFreq.append(self.sortedSpamList[i])
