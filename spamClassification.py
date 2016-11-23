@@ -40,7 +40,8 @@ class spamClassification:
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
 				if lowerEachWord not in uniqueWords:
-					uniqueWords.append(lowerEachWord)	
+					if lowerEachWord.isalpha():
+						uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
 				self.documentFreq[uniqueWords.pop()]+=1	
 			
@@ -63,7 +64,8 @@ class spamClassification:
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
 				if lowerEachWord not in uniqueWords:
-					uniqueWords.append(lowerEachWord)	
+					if lowerEachWord.isalpha():
+						uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
 				self.documentFreq[uniqueWords.pop()]+=1	
 				
@@ -77,7 +79,8 @@ class spamClassification:
 	
 		#print dict(Counter(allWords).most_common(50))
 		#print dict(Counter(allWords).most_common()[:-50:-1])
-		print "document freq is", self.documentFreq
+		#print "document freq is", self.documentFreq
+		print dict(Counter(self.documentFreq).most_common(100))
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
