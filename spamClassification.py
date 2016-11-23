@@ -5,9 +5,9 @@ from collections import Counter
 class spamClassification:
 	def __init__(self):
 		self.priorSpam = 0.0
-        self.priorNSpam = 0.0
-        self.mostFreq = []
-        self.sortedList = []
+        	self.priorNSpam = 0.0
+        	self.mostFreq = []
+        	self.sortedList = []
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -29,11 +29,13 @@ class spamClassification:
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
 			for eachWord in mail:
-				if (notSpamDict.get(eachWord) != None):
-					notSpamDict[eachWord] +=1
+				lowerEachWord = eachWord.lower()
+				if (notSpamDict.get(lowerEachWord) != None):
+					notSpamDict[lowerEachWord] +=1
 				else:
-					notSpamDict[eachWord] = 1
-				allWords[eachWord] += 1
+					notSpamDict[lowerEachWord] = 1
+				if eachWord.isalpha():
+					allWords[lowerEachWord] += 1
 			
 
 		mailList = []
@@ -45,22 +47,25 @@ class spamClassification:
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
 			for eachWord in mail:
-				if(spamDict.get(eachWord) != None):
-					spamDict[eachWord] +=1
+				lowerEachWord = eachWord.lower()
+				if(spamDict.get(lowerEachWord) != None):
+					spamDict[lowerEachWord] +=1
 				else:
-					spamDict[eachWord] = 1
-				allWords[eachWord] += 1
+					spamDict[lowerEachWord] = 1
+				if eachWord.isalpha():
+					allWords[lowerEachWord] += 1
 
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		
 		#pick top 50 words from spamDict and non spam Dict
 		self.sortedList = sorted(allWords, key=spamDict.get)
-		print "sorted list is", self.sortedList
+		#print "sorted list is", self.sortedList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
 		#for i in range(len(self.sortedList)-1, len(self.sortedList)-49, -1):
 			#self.mostFreq.append(self.sortedList[i])
-		print dict(Counter(allWords).most_common(5))
+		print dict(Counter(allWords).most_common(50))
+		print dict(Counter(allWords).most_common()[:-50:-1])
 		#print(notSpamDict)
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
