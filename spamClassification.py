@@ -1,6 +1,7 @@
 import os
 from _collections import defaultdict
 from collections import Counter
+import math
 
 class spamClassification:
 	def __init__(self):
@@ -10,6 +11,7 @@ class spamClassification:
         	self.sortedList = []
         	self.documentSpamFreq = defaultdict(int)
 		self.documentNSpamFreq = defaultdict(int)
+		self.entropyDict = defaultdict(int)
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -40,11 +42,11 @@ class spamClassification:
 					
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
-				if lowerEachWord not in uniqueWords:
-					if lowerEachWord.isalpha():
-						uniqueWords.append(lowerEachWord)	
+					
+				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
+					uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
-				self.documentFreq[uniqueWords.pop()] += 1	
+				self.documentSpamFreq[uniqueWords.pop()] += 1	
 			
 
 		mailList = []
@@ -64,11 +66,10 @@ class spamClassification:
 					spamDict[lowerEachWord] = 1
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
-				if lowerEachWord not in uniqueWords:
-					if lowerEachWord.isalpha():
-						uniqueWords.append(lowerEachWord)	
+				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
+					uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
-				self.documentFreq[uniqueWords.pop()] += 1	
+				self.documentNSpamFreq[uniqueWords.pop()] += 1	
 				
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
@@ -81,11 +82,11 @@ class spamClassification:
 		#print dict(Counter(allWords).most_common(50))
 		#print dict(Counter(allWords).most_common()[:-50:-1])
 		#print "document freq is", self.documentFreq
-		newDictDoc = {}
-		newDictDoc =  dict(Counter(self.documentFreq).most_common(100))
-		while newDictDoc:
-			(key, value) = newDictDoc.popitem()
-			print(value/(countSpam+countNSpam))
+		
+		#get the keyset of allWords dict to access each word in the dataset
+		words = allWords.keys()
+		calculateEntropy(words,countNSpam+countSpam)
+			
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
@@ -120,10 +121,22 @@ class spamClassification:
 					else:
 						probNSpam *= 1e-2
 				probNSpam *= priorNSpam
-	def decisionTree(self):
-		#
+				
+	def calculateEntropy(self,words,totalDocs):
+		for word in words:
+			numberSpam,numberNSpam = 0,0
+			if self.documentSpamFreq.get(word)!=None:
+				numberSpam = self.documentSpamFreq[word]
+			if self.documentNSpamFreq.get(word)!=None:	
+				numberNSpam = self.documentNSpamFreq[word]
+			
+			spamEntropy = -float(numberSpam/(numberSpam+numberNSpam)) * (math.log(numberSpam/(numberSpam+numberNSpam)))
+			nonSpamEntropy = -float(numberNSpam/(numberSpam+numberNSpam)) * (math.log(numberNSpam/(numberSpam+numberNSpam)))
+			
+			totalEntropy = (spamEntropy+nonSpamEntropy)*((numberSpam+numberNSpam)/totalDocs)
+			self.entropyDict[word] = totalEntropy
 		
-		print "in decision tree"	
+		print "entropy Dict is", self.entropyDict	
 spamObj = spamClassification()
 spamObj.createDictionary()
 #spamObj.calculateNaiveBayes()
