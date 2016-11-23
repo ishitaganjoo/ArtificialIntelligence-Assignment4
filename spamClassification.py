@@ -66,7 +66,6 @@ class spamClassification:
 			#self.mostFreq.append(self.sortedList[i])
 		print dict(Counter(allWords).most_common(50))
 		print dict(Counter(allWords).most_common()[:-50:-1])
-		#print(notSpamDict)
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
@@ -85,11 +84,7 @@ class spamClassification:
 				for eachWord in wordList:
 					if(spamDict.get(eachWord) != None):
 						value = spamDict[eachWord]
-						print(float(value[1]))
-						print(float(countSpam))
-						print(float(value[1])/float(countSpam))
 						probSpam = float(probSpam) * (float(value[1])/float(countSpam))
-						print("inside", probSpam)
 					else:
 						probSpam *= 1e-2
 				probSpam *= priorNSpam
