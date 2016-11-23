@@ -131,26 +131,25 @@ class spamClassification:
 			if self.documentNSpamFreq.get(word) != None:	
 				numberNSpam = self.documentNSpamFreq[word]
 			totalOccOfWord = numberSpam + numberNSpam
-			remainingDocs = (countSpam + countNSpam) - (totalOccurenceOfWord)
+			totalNonOccOfWord = totalDocs - (totalOccurenceOfWord)
 			spamNotContainingWord = countSpam - numberSpam
 			notSpamNotContainingWord = countNSpam - numberNSpam
 
-			totalDocs = countSpam+countNSpam
 
 			entropyBefore = -((countSpam/ totalDocs) * math.log(countSpam/ totalDocs)) - ((countNSpam / totalDocs) * math.log(countNSpam/ totalDocs))
-			entropySpam = -((numberSpam / totalOccOfWord) * math.log(numberSpam / totalOccOfWord)) - ((numberNSpam / totalOccOfWord) * math.log(
+			entropyLeft = -((numberSpam / totalOccOfWord) * math.log(numberSpam / totalOccOfWord)) - ((numberNSpam / totalOccOfWord) * math.log(
 			numberNSpam / totalOccOfWord))
 			
-			entropyNSpam = -((spamNotContainingWord / remainingDocs) * math.log(spamNotContainingWord / remainingDocs)) - ((notSpamNotContainingWord / 
-			remainingDocs) * math.log(notSpamNotContainingWord / remainingDocs))
+			entropyRight = -((spamNotContainingWord / totalNonOccOfWord) * math.log(spamNotContainingWord / totalNonOccOfWord)) - ((notSpamNotContainingWord / 
+			totalNonOccOfWord) * math.log(notSpamNotContainingWord / totalNonOccOfWord))
 
-			entropyAfter = ((totalOccOfWord / totalDocs)*entropySpam) + ((remainingDocs / totalDocs) * entropyNSpam)
+			entropyAfter = ((totalOccOfWord / totalDocs)*entropyLeft) + ((totalNonOccOfWord / totalDocs) * entropyRight)
 			
 			infoGain = entropyBefore - entropyAfter
 
 			entropyDict[word] = infoGain
 		
-		#print "entropy Dict is", self.entropyDict	
+		print "entropy Dict is", self.entropyDict	
 spamObj = spamClassification()
 spamObj.createDictionary()
 #spamObj.calculateNaiveBayes()
