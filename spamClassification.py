@@ -124,16 +124,18 @@ class spamClassification:
 				
 	def calculateEntropy(self,words,totalDocs):
 		for word in words:
-			numberSpam,numberNSpam = 0,0
+			numberSpam,numberNSpam,spamEntropy,nonSpamEntropy = 0,0,0,0
 			if self.documentSpamFreq.get(word)!=None:
 				numberSpam = self.documentSpamFreq[word]
 			if self.documentNSpamFreq.get(word)!=None:	
 				numberNSpam = self.documentNSpamFreq[word]
+		
+			if float(numberSpam/(numberSpam+numberNSpam)) != 0:
+				spamEntropy = -float(numberSpam/(numberSpam+numberNSpam)) * (math.log(numberSpam/(numberSpam+numberNSpam)))
+			if float(numberNSpam/(numberSpam+numberNSpam)) != 0:
+				nonSpamEntropy = -float(numberNSpam/(numberSpam+numberNSpam)) * (math.log(numberNSpam/(numberSpam+numberNSpam)))
 			
-			spamEntropy = -float(numberSpam/(numberSpam+numberNSpam)) * (math.log(numberSpam/(numberSpam+numberNSpam)))
-			nonSpamEntropy = -float(numberNSpam/(numberSpam+numberNSpam)) * (math.log(numberNSpam/(numberSpam+numberNSpam)))
-			
-			totalEntropy = (spamEntropy+nonSpamEntropy)*((numberSpam+numberNSpam)/totalDocs)
+			totalEntropy = (spamEntropy+nonSpamEntropy)*(float((numberSpam+numberNSpam)/totalDocs))
 			self.entropyDict[word] = totalEntropy
 		
 		print "entropy Dict is", self.entropyDict	
