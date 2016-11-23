@@ -1,15 +1,14 @@
 import os
 from _collections import defaultdict
+from collections import Counter
 
 class spamClassification:
 	def __init__(self):
 		self.priorSpam = 0.0
-        	self.priorNSpam = 0.0
-        	self.sortedSpamList =[]
-        	self.sortedNSpamList =[]
-        	self.spamMostFreq = []
-        	self.nonSpamMostFreq = []
-	
+        self.priorNSpam = 0.0
+        self.mostFreq = []
+        self.sortedList = []
+
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
 		priorSpam,priorNSpam= 0.0,0.0
@@ -54,23 +53,14 @@ class spamClassification:
 
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
-		#print("prior Spam",self.priorSpam)
-		#print("prior Non Spam",self.priorNSpam)
 		
 		#pick top 50 words from spamDict and non spam Dict
-		self.sortedSpamList = sorted(spamDict, key=spamDict.get)
-		#print "sorted list is",self.sortedSpamList
-		
-		self.sortedNSpamList = sorted(notSpamDict, key=notSpamDict.get)
-		#print "sorted list is",self.sortedNSpamList
-
-		print "ANAND",spamDict["the"],notSpamDict["the"],allWords["the"]
+		self.sortedList = sorted(allWords, key=spamDict.get)
+		print "sorted list is", self.sortedList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
-		for i in range(len(self.sortedSpamList)-1, len(self.sortedSpamList)-49, -1):
-			self.spamMostFreq.append(self.sortedSpamList[i])
-			
-		for i in range(len(self.sortedNSpamList)-1, len(self.sortedNSpamList)-49, -1):
-			self.nonSpamMostFreq.append(self.sortedNSpamList[i])
+		#for i in range(len(self.sortedList)-1, len(self.sortedList)-49, -1):
+			#self.mostFreq.append(self.sortedList[i])
+		print dict(Counter(allWords).most_common(5))
 		#print(notSpamDict)
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
