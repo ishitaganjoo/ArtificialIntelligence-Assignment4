@@ -8,7 +8,8 @@ class spamClassification:
         	self.priorNSpam = 0.0
         	self.mostFreq = []
         	self.sortedList = []
-        	self.documentFreq = defaultdict(int)
+        	self.documentSpamFreq = defaultdict(int)
+		self.documentNSpamFreq = defaultdict(int)
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -43,7 +44,7 @@ class spamClassification:
 					if lowerEachWord.isalpha():
 						uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
-				self.documentFreq[uniqueWords.pop()]+=1	
+				self.documentFreq[uniqueWords.pop()] += 1	
 			
 
 		mailList = []
@@ -67,7 +68,7 @@ class spamClassification:
 					if lowerEachWord.isalpha():
 						uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
-				self.documentFreq[uniqueWords.pop()]+=1	
+				self.documentFreq[uniqueWords.pop()] += 1	
 				
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
@@ -80,7 +81,11 @@ class spamClassification:
 		#print dict(Counter(allWords).most_common(50))
 		#print dict(Counter(allWords).most_common()[:-50:-1])
 		#print "document freq is", self.documentFreq
-		print dict(Counter(self.documentFreq).most_common(100))
+		newDictDoc = {}
+		newDictDoc =  dict(Counter(self.documentFreq).most_common(100))
+		while newDictDoc:
+			(key, value) = newDictDoc.popitem()
+			print(value/(countSpam+countNSpam))
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
