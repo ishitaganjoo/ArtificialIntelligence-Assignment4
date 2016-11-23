@@ -8,6 +8,7 @@ class spamClassification:
         	self.priorNSpam = 0.0
         	self.mostFreq = []
         	self.sortedList = []
+        	self.documentFreq = defaultdict(int)
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -28,14 +29,20 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
+			uniqueWords = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
 				if (notSpamDict.get(lowerEachWord) != None):
 					notSpamDict[lowerEachWord] +=1
 				else:
 					notSpamDict[lowerEachWord] = 1
+					
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
+				if lowerEachWord not in uniqueWords:
+					uniqueWords.append(lowerEachWord)	
+			while uniqueWords:
+				self.documentFreq[uniqueWords.pop()]+=1	
 			
 
 		mailList = []
@@ -46,6 +53,7 @@ class spamClassification:
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
+			uniqueWords = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
 				if(spamDict.get(lowerEachWord) != None):
@@ -54,7 +62,11 @@ class spamClassification:
 					spamDict[lowerEachWord] = 1
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
-
+				if lowerEachWord not in uniqueWords:
+					uniqueWords.append(lowerEachWord)	
+			while uniqueWords:
+				self.documentFreq[uniqueWords.pop()]+=1	
+				
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		
@@ -62,34 +74,44 @@ class spamClassification:
 		self.sortedList = sorted(allWords, key=spamDict.get)
 		#print "sorted list is", self.sortedList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
-		#for i in range(len(self.sortedList)-1, len(self.sortedList)-49, -1):
-			#self.mostFreq.append(self.sortedList[i])
-		print dict(Counter(allWords).most_common(50))
-		print dict(Counter(allWords).most_common()[:-50:-1])
+	
+		#print dict(Counter(allWords).most_common(50))
+		#print dict(Counter(allWords).most_common()[:-50:-1])
+		print "document freq is", self.documentFreq
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
 		mailList = []
-		wordList = []
-		probSpam = 1.0
+		
 		dirTestSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
 		for fileName in dirTestSpam:
-			wordList= []
+			mailList= []
+			probSpam = 1.0
 			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
 				content = f.readlines()
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 				for eachWord in mailList[0]:
-					wordList.append(eachWord)
-				for eachWord in wordList:
-					if(spamDict.get(eachWord) != None):
-						value = spamDict[eachWord]
-						probSpam = float(probSpam) * (float(value[1])/float(countSpam))
+					if(self.documentFreq.get(eachWord) != None):
+						probSpam = float(probSpam) * (float(self.documentFreq[eachWord])/float(countSpam))
 					else:
 						probSpam *= 1e-2
-				probSpam *= priorNSpam
-	
-	
+				probSpam *= priorSpam
+				
+		dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+		for fileName in dirTestNSpam:
+			mailList= []
+			probNSpam = 1.0
+			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
+				content = f.readlines()
+				newStr = "".join(content)
+				mailList.append(newStr.split(' '))
+				for eachWord in mailList[0]:
+					if(self.documentFreq.get(eachWord) != None):
+						probNSpam = float(probNSpam) * (float(self.documentFreq[eachWord])/float(countSpam))
+					else:
+						probNSpam *= 1e-2
+				probNSpam *= priorNSpam
 	def decisionTree(self):
 		#
 		
