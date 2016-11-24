@@ -12,6 +12,8 @@ class spamClassification:
         	self.documentSpamFreq = defaultdict(int)
 		self.documentNSpamFreq = defaultdict(int)
 		self.entropyDict = defaultdict(int)
+		self.spamWordDocList = []
+		self.nSpamWordDocList = []
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
@@ -33,6 +35,7 @@ class spamClassification:
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
 			uniqueWords = []
+			wordsListPerMail = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
 				if (notSpamDict.get(lowerEachWord) != None):
@@ -42,12 +45,17 @@ class spamClassification:
 					
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
+					wordsListPerMail.append(lowerEachWord)
 					
 				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
 					uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
 				newWord = uniqueWords.pop()
 				self.documentNSpamFreq[newWord] += 1	
+			self.nSpamWordDocList.append(wordsListPerMail)
+
+		#print(self.nSpamWordDocList)
+			
 			
 
 		mailList = []
@@ -59,6 +67,7 @@ class spamClassification:
 				mailList.append(newStr.split(' '))
 		for mail in mailList:
 			uniqueWords = []
+			wordsListPerMail = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
 				if(spamDict.get(lowerEachWord) != None):
@@ -67,12 +76,14 @@ class spamClassification:
 					spamDict[lowerEachWord] = 1
 				if eachWord.isalpha():
 					allWords[lowerEachWord] += 1
+					wordsListPerMail.append(lowerEachWord)
 				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
 					uniqueWords.append(lowerEachWord)	
 			while uniqueWords:
 				newWord = uniqueWords.pop()
 				self.documentSpamFreq[newWord] += 1	
-				
+			self.spamWordDocList.append(wordsListPerMail)
+		#print(self.spamWordDocList)
 		self.priorSpam = countSpam/(countSpam+countNSpam)
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		
@@ -80,10 +91,6 @@ class spamClassification:
 		self.sortedList = sorted(allWords, key=spamDict.get)
 		#print "sorted list is", self.sortedList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
-	
-		#print dict(Counter(allWords).most_common(50))
-		#print dict(Counter(allWords).most_common()[:-50:-1])
-		#print "document freq is", self.documentFreq
 		
 		#get the keyset of allWords dict to access each word in the dataset
 		words = allWords.keys()
@@ -135,23 +142,18 @@ class spamClassification:
 			totalOccOfWord = numberSpam + numberNSpam
 			totalNonOccOfWord = totalDocs - (totalOccOfWord)
 			spamNotContainingWord = countSpam - numberSpam
-			#print("count spam", countSpam)
-			#print("number Spam",numberSpam)
 			notSpamNotContainingWord = countNSpam - numberNSpam
 
 
 			entropyBefore = -(float(countSpam/ totalDocs) * math.log(float(countSpam/ totalDocs))) - (float(countNSpam / totalDocs) * 
 			math.log(float(countNSpam/ totalDocs)))	
 			if numberSpam!=0.0:
-				#print(numberSpam, float(float(numberSpam) / float(totalOccOfWord)))
 				entropyLeftSpam = -(float(float(numberSpam) / float(totalOccOfWord)) * math.log(float(float(numberSpam) / float(totalOccOfWord))))
 			if numberNSpam!=0.0:
 				entropyLeftNSpam = - (float(float(numberNSpam) / float(totalOccOfWord)) * math.log(float(float(numberNSpam) / float(totalOccOfWord))))
 			entropyLeft = entropyLeftSpam+entropyLeftNSpam
-			#print("left", entropyLeft)
 			
 			if spamNotContainingWord != 0.0:
-				#print("spam", spamNotContainingWord)
 				entropyRightSpam = -(float(float(spamNotContainingWord) / float(totalNonOccOfWord)) 
 				* math.log(float(float(spamNotContainingWord) / float(totalNonOccOfWord))))
 			if notSpamNotContainingWord!=0.0:
@@ -164,10 +166,37 @@ class spamClassification:
 			infoGain = entropyBefore - entropyAfter
 
 			entropyDict[word] = infoGain
+			
+		maxInfoGain = max(entropyDict, key=(lambda key: entropyDict[key]))
+		print("Rohil",maxInfoGain)
+		infoGainMail = []
+		nInfoGainMail = []
+		for i in range(0, len(self.spamWordDocList)):
+			if(maxInfoGain in self.spamWordDocList[i]):
+				for j in range(0, len(self.spamWordDocList[i])):
+					if self.spamWordDocList[i][j] not in infoGainMail and self.spamWordDocList[i][j] != maxInfoGain:
+						infoGainMail.append(self.spamWordDocList[i][j])
+			else:
+				for j in range(0, len(self.spamWordDocList[i])):
+					if self.spamWordDocList[i][j] not in nInfoGainMail:
+						nInfoGainMail.append(self.spamWordDocList[i][j])
+		for i in range(0, len(self.nSpamWordDocList)):
+			if(maxInfoGain in self.nSpamWordDocList[i]):
+				for j in range(0, len(self.nSpamWordDocList[i])):
+					if self.nSpamWordDocList[i][j] not in infoGainMail and self.nSpamWordDocList[i][j] != maxInfoGain:
+						infoGainMail.append(self.nSpamWordDocList[i][j])
+			else:
+				for j in range(0, len(self.nSpamWordDocList[i])):
+					if self.nSpamWordDocList[i][j] not in nInfoGainMail:
+						nInfoGainMail.append(self.nSpamWordDocList[i][j])
 		
-		for i in entropyDict:
-			print(i, entropyDict[i])
-		print(max(entropyDict, key=(lambda key: entropyDict[key])))	
+		#print("abc",infoGainMail)		
+		#print("cde",nInfoGainMail)
+		self.calculateEntropy(infoGainMail, totalDocs, countSpam, countNSpam)
+
+		#for i in entropyDict:
+			#print(i, entropyDict[i])
+		#print(max(entropyDict, key=(lambda key: entropyDict[key])))	
 spamObj = spamClassification()
 spamObj.createDictionary()
 #spamObj.calculateNaiveBayes()
