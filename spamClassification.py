@@ -85,7 +85,7 @@ class spamClassification:
 		
 		#get the keyset of allWords dict to access each word in the dataset
 		words = allWords.keys()
-		self.calculateEntropy(words,countNSpam+countSpam)
+		self.calculateEntropy(words,countNSpam+countSpam, countSpam, countNSpam)
 			
 		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
 
@@ -122,10 +122,10 @@ class spamClassification:
 						probNSpam *= 1e-2
 				probNSpam *= priorNSpam
 				
-	def calculateEntropy(self,words,totalDocs):
+	def calculateEntropy(self,words,totalDocs, countSpam, countNSpam):
 		entropyDict = defaultdict(int)
 		for word in words:
-			numberSpam,numberNSpam,spamEntropy,nonSpamEntropy,entropyLeftSpam,entropyLeftNSpam = 0,0,0,0,0,0
+			numberSpam,numberNSpam,spamEntropy,nonSpamEntropy,entropyLeftSpam,entropyLeftNSpam, entropyRightSpam, entropyRightNSpam = 0,0,0,0,0,0,0,0
 			if self.documentSpamFreq.get(word) != None:
 				numberSpam = self.documentSpamFreq[word]
 			if self.documentNSpamFreq.get(word) != None:	
@@ -133,21 +133,27 @@ class spamClassification:
 			totalOccOfWord = numberSpam + numberNSpam
 			totalNonOccOfWord = totalDocs - (totalOccOfWord)
 			spamNotContainingWord = countSpam - numberSpam
+			print(spamNotContainingWord)
 			notSpamNotContainingWord = countNSpam - numberNSpam
 
 
-			entropyBefore = -(float(countSpam/ totalDocs) * math.log(float(countSpam/ totalDocs))) - (float(countNSpam / totalDocs) * math.log(float(countNSpam/ totalDocs)))
-			
-			if numberSpam!=0:
-				entropyLeftSpam = -(float(numberSpam / totalOccOfWord) * math.log(float(numberSpam / totalOccOfWord)))
-			if numberNSpam!=0:
-				entropyLeftNSpam = 	- (float(numberNSpam / totalOccOfWord) * math.log(float(numberNSpam / totalOccOfWord)))
+			entropyBefore = -(float(countSpam/ totalDocs) * math.log(float(countSpam/ totalDocs))) - (float(countNSpam / totalDocs) * 
+			math.log(float(countNSpam/ totalDocs)))	
+			if numberSpam!=0.0:
+				#print(numberSpam, float(float(numberSpam) / float(totalOccOfWord)))
+				entropyLeftSpam = -(float(float(numberSpam) / float(totalOccOfWord)) * math.log(float(float(numberSpam) / float(totalOccOfWord))))
+			if numberNSpam!=0.0:
+				entropyLeftNSpam = - (float(float(numberNSpam) / float(totalOccOfWord)) * math.log(float(float(numberNSpam) / float(totalOccOfWord))))
 			entropyLeft = entropyLeftSpam+entropyLeftNSpam
+			#print("left", entropyLeft)
 			
-			if spamNotContainingWord!=0:
-				entropyRightSpam = -(float(spamNotContainingWord / totalNonOccOfWord) * math.log(float(spamNotContainingWord / totalNonOccOfWord)))
-			if notSpamNotContainingWord!=0:
-				entropyRightNSpam = - (float(notSpamNotContainingWord / totalNonOccOfWord) * math.log(float(notSpamNotContainingWord / totalNonOccOfWord)))	
+			if spamNotContainingWord != 0.0:
+				print("spam", spamNotContainingWord)
+				entropyRightSpam = -(float(float(spamNotContainingWord) / float(totalNonOccOfWord)) 
+				* math.log(float(float(spamNotContainingWord) / float(totalNonOccOfWord))))
+			if notSpamNotContainingWord!=0.0:
+				entropyRightNSpam = - (float(float(notSpamNotContainingWord) / float(totalNonOccOfWord)) * 
+				math.log(float(float(notSpamNotContainingWord) / float(totalNonOccOfWord))))	
 			entropyRight = entropyRightSpam+entropyRightNSpam
 			
 			entropyAfter = (float(totalOccOfWord / totalDocs)*entropyLeft) + (float(totalNonOccOfWord / totalDocs) * entropyRight)
