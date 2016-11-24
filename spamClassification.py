@@ -125,25 +125,32 @@ class spamClassification:
 	def calculateEntropy(self,words,totalDocs):
 		entropyDict = defaultdict(int)
 		for word in words:
-			numberSpam,numberNSpam,spamEntropy,nonSpamEntropy = 0,0,0,0
+			numberSpam,numberNSpam,spamEntropy,nonSpamEntropy,entropyLeftSpam,entropyLeftNSpam = 0,0,0,0,0,0
 			if self.documentSpamFreq.get(word) != None:
 				numberSpam = self.documentSpamFreq[word]
 			if self.documentNSpamFreq.get(word) != None:	
 				numberNSpam = self.documentNSpamFreq[word]
 			totalOccOfWord = numberSpam + numberNSpam
-			totalNonOccOfWord = totalDocs - (totalOccurenceOfWord)
+			totalNonOccOfWord = totalDocs - (totalOccOfWord)
 			spamNotContainingWord = countSpam - numberSpam
 			notSpamNotContainingWord = countNSpam - numberNSpam
 
 
-			entropyBefore = -((countSpam/ totalDocs) * math.log(countSpam/ totalDocs)) - ((countNSpam / totalDocs) * math.log(countNSpam/ totalDocs))
-			entropyLeft = -((numberSpam / totalOccOfWord) * math.log(numberSpam / totalOccOfWord)) - ((numberNSpam / totalOccOfWord) * math.log(
-			numberNSpam / totalOccOfWord))
+			entropyBefore = -(float(countSpam/ totalDocs) * math.log(float(countSpam/ totalDocs))) - (float(countNSpam / totalDocs) * math.log(float(countNSpam/ totalDocs)))
 			
-			entropyRight = -((spamNotContainingWord / totalNonOccOfWord) * math.log(spamNotContainingWord / totalNonOccOfWord)) - ((notSpamNotContainingWord / 
-			totalNonOccOfWord) * math.log(notSpamNotContainingWord / totalNonOccOfWord))
-
-			entropyAfter = ((totalOccOfWord / totalDocs)*entropyLeft) + ((totalNonOccOfWord / totalDocs) * entropyRight)
+			if numberSpam!=0:
+				entropyLeftSpam = -(float(numberSpam / totalOccOfWord) * math.log(float(numberSpam / totalOccOfWord)))
+			if numberNSpam!=0:
+				entropyLeftNSpam = 	- (float(numberNSpam / totalOccOfWord) * math.log(float(numberNSpam / totalOccOfWord)))
+			entropyLeft = entropyLeftSpam+entropyLeftNSpam
+			
+			if spamNotContainingWord!=0:
+				entropyRightSpam = -(float(spamNotContainingWord / totalNonOccOfWord) * math.log(float(spamNotContainingWord / totalNonOccOfWord)))
+			if notSpamNotContainingWord!=0:
+				entropyRightNSpam = - (float(notSpamNotContainingWord / totalNonOccOfWord) * math.log(float(notSpamNotContainingWord / totalNonOccOfWord)))	
+			entropyRight = entropyRightSpam+entropyRightNSpam
+			
+			entropyAfter = (float(totalOccOfWord / totalDocs)*entropyLeft) + (float(totalNonOccOfWord / totalDocs) * entropyRight)
 			
 			infoGain = entropyBefore - entropyAfter
 
