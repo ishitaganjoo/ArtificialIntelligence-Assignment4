@@ -94,42 +94,58 @@ class spamClassification:
 		
 		#get the keyset of allWords dict to access each word in the dataset
 		words = allWords.keys()
-		self.calculateEntropy(words,countNSpam+countSpam, countSpam, countNSpam)
+		#self.calculateEntropy(words,countNSpam+countSpam, countSpam, countNSpam)
 			
-		#self.calculateNaiveBayes(spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam)
+		self.calculateNaiveBayes(spamDict, notSpamDict,  countSpam, countNSpam)
 
-	def calculateNaiveBayes(self, spamDict, notSpamDict, priorSpam, priorNSpam, countSpam, countNSpam):
+	def calculateNaiveBayes(self, spamDict, notSpamDict, countSpam, countNSpam):
 		mailList = []
 		
 		dirTestSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+		testDocs = 0.0
+		accuracyCount = 0.0
 		for fileName in dirTestSpam:
+			testDocs += 1
 			mailList= []
-			probSpam = 1.0
+			probSpam = 0.0
+			probNSpam = 0.0
 			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
 				content = f.readlines()
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 				for eachWord in mailList[0]:
-					if(self.documentFreq.get(eachWord) != None):
-						probSpam = float(probSpam) * (float(self.documentFreq[eachWord])/float(countSpam))
-					else:
-						probSpam *= 1e-2
-				probSpam *= priorSpam
+					if(self.documentSpamFreq.get(eachWord) != None):
+						probSpam += math.log(float(self.documentSpamFreq[eachWord])/float(countSpam))
+					if(self.documentNSpamFreq.get(eachWord) != None):
+						probNSpam += math.log(float(self.documentNSpamFreq[eachWord]) / float(countNSpam))
+				probSpam += math.log(float(self.priorSpam))
+				probNSpam += math.log(float(self.priorNSpam))
+			if(probSpam > probNSpam):
+				accuracyCount += 1
+		print("Accuracy is", accuracyCount/testDocs)
 				
-		dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+		dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
+		testDocs = 0.0
+		accuracyCount = 0.0
 		for fileName in dirTestNSpam:
 			mailList= []
-			probNSpam = 1.0
-			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
+			testDocs += 1
+			probNSpam = 0.0
+			probSpam = 0.0
+			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
 				content = f.readlines()
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
 				for eachWord in mailList[0]:
-					if(self.documentFreq.get(eachWord) != None):
-						probNSpam = float(probNSpam) * (float(self.documentFreq[eachWord])/float(countSpam))
-					else:
-						probNSpam *= 1e-2
-				probNSpam *= priorNSpam
+					if(self.documentNSpamFreq.get(eachWord) != None):
+						probNSpam += math.log(float(self.documentNSpamFreq[eachWord])/float(countSpam))
+					if(self.documentSpamFreq.get(eachWord) != None):
+						probSpam += math.log(float(self.documentSpamFreq[eachWord]) / float(countNSpam))
+				probNSpam += math.log(float(self.priorNSpam))
+				probSpam += math.log(float(self.priorSpam))
+			if(probNSpam > probSpam):
+				accuracyCount += 1
+		print("Accuracy is", accuracyCount/testDocs)
 				
 	def calculateEntropy(self,words,totalDocs, countSpam, countNSpam):
 		entropyDict = defaultdict(int)
@@ -192,7 +208,9 @@ class spamClassification:
 		
 		#print("abc",infoGainMail)		
 		#print("cde",nInfoGainMail)
-		self.calculateEntropy(infoGainMail, totalDocs, countSpam, countNSpam)
+		#self.calculateEntropy(infoGainMail, totalDocs, countSpam, countNSpam)
+		print(len(self.documentSpamFreq))
+		print(len(self.documentNSpamFreq))
 
 		#for i in entropyDict:
 			#print(i, entropyDict[i])
