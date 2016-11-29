@@ -14,18 +14,19 @@ class spamClassification:
 		self.entropyDict = defaultdict(int)
 		self.spamWordDocList = []
 		self.nSpamWordDocList = []
+		self.allWords = defaultdict(int)
+		self.spamDict = {}
+		self.notSpamDict = {}
 
 	def createDictionary(self):
 		countSpam,countNSpam = 0.0,0.0
 		priorSpam,priorNSpam= 0.0,0.0
 		dirNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
 		dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
-		notSpamDict = {}
-		spamDict = {}
 		
 		mailList= []
 		
-		allWords = defaultdict(int)
+		#allWords = defaultdict(int)
 				
 		for fileName in dirNSpam:
 			countNSpam += 1
@@ -38,13 +39,13 @@ class spamClassification:
 			wordsListPerMail = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
-				if (notSpamDict.get(lowerEachWord) != None):
-					notSpamDict[lowerEachWord] +=1
+				if (self.notSpamDict.get(lowerEachWord) != None):
+					self.notSpamDict[lowerEachWord] +=1
 				else:
-					notSpamDict[lowerEachWord] = 1
+					self.notSpamDict[lowerEachWord] = 1
 					
 				if eachWord.isalpha():
-					allWords[lowerEachWord] += 1
+					self.allWords[lowerEachWord] += 1
 					wordsListPerMail.append(lowerEachWord)
 					
 				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
@@ -70,12 +71,12 @@ class spamClassification:
 			wordsListPerMail = []
 			for eachWord in mail:
 				lowerEachWord = eachWord.lower()
-				if(spamDict.get(lowerEachWord) != None):
-					spamDict[lowerEachWord] +=1
+				if(self.spamDict.get(lowerEachWord) != None):
+					self.spamDict[lowerEachWord] +=1
 				else:
-					spamDict[lowerEachWord] = 1
+					self.spamDict[lowerEachWord] = 1
 				if eachWord.isalpha():
-					allWords[lowerEachWord] += 1
+					self.allWords[lowerEachWord] += 1
 					wordsListPerMail.append(lowerEachWord)
 				if lowerEachWord not in uniqueWords and lowerEachWord.isalpha():
 					uniqueWords.append(lowerEachWord)	
@@ -88,15 +89,15 @@ class spamClassification:
 		self.priorNSpam = countNSpam/(countSpam+countNSpam)	
 		
 		#pick top 50 words from spamDict and non spam Dict
-		self.sortedList = sorted(allWords, key=spamDict.get)
+		self.sortedList = sorted(self.allWords, key=self.spamDict.get)
 		#print "sorted list is", self.sortedList
 		#combine and select top 50 in both, make a table with rows as docs and columns as words.
 		
 		#get the keyset of allWords dict to access each word in the dataset
-		words = allWords.keys()
+		words = self.allWords.keys()
 		#self.calculateEntropy(words,countNSpam+countSpam, countSpam, countNSpam)
 			
-		self.calculateNaiveBayes(spamDict, notSpamDict,  countSpam, countNSpam)
+		self.calculateNaiveBayes(self.spamDict, self.notSpamDict,  countSpam, countNSpam)
 
 	def calculateNaiveBayes(self, spamDict, notSpamDict, countSpam, countNSpam):
 		mailList = []
@@ -104,25 +105,43 @@ class spamClassification:
 		dirTestSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
 		testDocs = 0.0
 		accuracyCount = 0.0
+		accuracyContinuous = 0.0
 		for fileName in dirTestSpam:
 			testDocs += 1
 			mailList= []
 			probSpam = 0.0
 			probNSpam = 0.0
+			probSpamCont = 0.0
+			probNSpamCont = 0.0
 			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
 				content = f.readlines()
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
+				spamDictSum = sum(self.spamDict.values())
+				notSpamDictSum = sum(self.notSpamDict.values())
 				for eachWord in mailList[0]:
+					#for binary
 					if(self.documentSpamFreq.get(eachWord) != None):
 						probSpam += math.log(float(self.documentSpamFreq[eachWord])/float(countSpam))
 					if(self.documentNSpamFreq.get(eachWord) != None):
 						probNSpam += math.log(float(self.documentNSpamFreq[eachWord]) / float(countNSpam))
+					if(self.spamDict.get(eachWord) != None):
+					#print "sum is", sum(self.spamDict.values())
+						probSpamCont += math.log(float(self.spamDict[eachWord] / float(spamDictSum)))
+					if(self.notSpamDict.get(eachWord) != None):
+						probNSpamCont += math.log(float(self.notSpamDict[eachWord] / float(notSpamDictSum)))	
 				probSpam += math.log(float(self.priorSpam))
 				probNSpam += math.log(float(self.priorNSpam))
+				probSpamCont += math.log(float(self.priorSpam))
+				probNSpamCont += math.log(float(self.priorNSpam))
+				#print "prob Spam, not Spam",probSpam, probNSpam
+				#rint "prob spam cont, not spam cont", probSpamCont, probNSpamCont
 			if(probSpam > probNSpam):
 				accuracyCount += 1
+			if(probSpamCont > probNSpamCont):
+				accuracyContinuous += 1
 		print("Accuracy is", accuracyCount/testDocs)
+		print "Accuracy for continuous is", accuracyContinuous/testDocs
 				
 		dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
 		testDocs = 0.0
