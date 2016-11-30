@@ -129,7 +129,6 @@ class spamClassification:
 					else:
 						probNSpam += math.log(1e-9)
 					if(self.spamDict.get(eachWord) != None):
-					#print "sum is", sum(self.spamDict.values())
 						probSpamCont += math.log(float(self.spamDict[eachWord] / float(spamDictSum)))
 					else:
 						probSpamCont += math.log(1e-9)
@@ -153,15 +152,20 @@ class spamClassification:
 		dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
 		testDocs = 0.0
 		accuracyCount = 0.0
+		accuracyContinuous = 0.0
 		for fileName in dirTestNSpam:
 			mailList= []
 			testDocs += 1
 			probNSpam = 0.0
 			probSpam = 0.0
+			probSpamCont = 0.0
+			probNSpamCont = 0.0
 			with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
 				content = f.readlines()
 				newStr = "".join(content)
 				mailList.append(newStr.split(' '))
+				spamDictSum = sum(self.spamDict.values())
+                                notSpamDictSum = sum(self.notSpamDict.values())
 				for eachWord in mailList[0]:
 					if(self.documentNSpamFreq.get(eachWord) != None):
 						probNSpam += math.log(float(self.documentNSpamFreq[eachWord])/float(countSpam))
@@ -171,11 +175,25 @@ class spamClassification:
 						probSpam += math.log(float(self.documentSpamFreq[eachWord]) / float(countNSpam))
 					else:
 						probSpam += math.log(1e-9)
+					if(self.spamDict.get(eachWord) != None):
+                                                probSpamCont += math.log(float(self.spamDict[eachWord] / float(spamDictSum)))
+                                        else:
+                                                probSpamCont += math.log(1e-9)
+                                        if(self.notSpamDict.get(eachWord) != None):
+                                                probNSpamCont += math.log(float(self.notSpamDict[eachWord] / float(notSpamDictSum)))
+                                        else:
+                                                probNSpamCont += math.log(1e-9)
+
 				probNSpam += math.log(float(self.priorNSpam))
 				probSpam += math.log(float(self.priorSpam))
+				probSpamCont += math.log(float(self.priorSpam))
+				probNSpamCont += math.log(float(self.priorNSpam))
 			if(probNSpam > probSpam):
 				accuracyCount += 1
+			if(probNSpamCont > probSpamCont):
+				accuracyContinuous += 1
 		print("Accuracy non spam is", accuracyCount/testDocs)
+		print("Accuracy non spam continuous is", accuracyContinuous/testDocs)
 				
 	def calculateEntropy(self,words,totalDocs, countSpam, countNSpam):
 		entropyDict = defaultdict(int)
