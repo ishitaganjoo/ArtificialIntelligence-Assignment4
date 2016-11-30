@@ -3,6 +3,8 @@ from _collections import defaultdict
 from collections import Counter
 import math
 import string
+import sys
+import pickle
 
 class spamClassification:
 	def __init__(self):
@@ -263,6 +265,14 @@ class spamClassification:
 		#for i in entropyDict:
 			#print(i, entropyDict[i])
 		#print(max(entropyDict, key=(lambda key: entropyDict[key])))	
-spamObj = spamClassification()
-spamObj.createDictionary()
+#spamObj = spamClassification()
+#spamObj.createDictionary()
+(mode, technique, dataDirectory, modelFile) = sys.argv[1:]
+if mode == 'train':
+	spamObj = spamClassification()
+	#spamObj.createDictionary()
+	pickle.dump(spamObj, open(modelFile, "wb"))
+elif mode == 'test':
+	spamObj = pickle.load(open(modelFile, "rb"))
+	spamObj.createDictionary()
 #spamObj.calculateNaiveBayes()
