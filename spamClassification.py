@@ -26,7 +26,7 @@ class spamClassification:
         self.fb = fb
 
     def createDictionary(self):
-        print "In createDictionary"
+        #print "In createDictionary"
         countSpam,countNSpam = 0.0,0.0
         priorSpam,priorNSpam= 0.0,0.0
         dirNSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
@@ -81,12 +81,12 @@ class spamClassification:
         
         #get the keyset of allWords dict to access each word in the dataset
         self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
-        print "Anand total words are", len(self.totalWordsList)
+        #print "Anand total words are", len(self.totalWordsList)
         self.decisionMatrix(dirSpam, dirNSpam)
-        print "Out createDictionary"
+        #print "Out createDictionary"
 
     def decisionMatrix(self, dirSpam, dirNSpam):
-        print "In decisionMatrix"
+        #print "In decisionMatrix"
         mailList = []
         for fileName in dirSpam: 
             with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam/"+fileName, "r") as f:
@@ -114,7 +114,6 @@ class spamClassification:
         for mail in mailList:
             listIndex = []
             listIndex = [0]*(len(self.totalWordsList) + 1)
-            flag = 0
             for eachWord in mail:
                 lowerEachWord = eachWord.lower().translate(None, string.punctuation)
                 if lowerEachWord in self.totalWordsList:
@@ -123,38 +122,36 @@ class spamClassification:
             listIndex.append('notspam')
             self.allWordsMatrix.append(listIndex)
 
-        for idx in self.allWordsMatrix:
-            print idx
-            print ""
+        #for idx in self.allWordsMatrix:
+            #print idx
+            #print ""
 
-        print "Out decisionMatrix"
+        #print "Out decisionMatrix"
     
     def entropyCalculate(self, wordsMatrix):
-        print "In entropyCalculate"
+        #print "In entropyCalculate"
         results = {}
         for mail in wordsMatrix:
             r = mail[len(mail) - 1]
-            if r not in results:
-                results[r] = 0
-            else:
-                results[r] += 1
-        print "Out entropyCalculate"
+            if r not in results: results[r] = 0
+            results[r] += 1
+        #print "Out entropyCalculate"
         return results
 
     def entropyForWords(self, wordsMatrix):
-        print "In entropyForWords"
+        #print "In entropyForWords"
         from math import log
         log2=lambda x:log(x)/log(2)
         results = self.entropyCalculate(wordsMatrix)
         entropy = 0.0
         for r in results.keys():
-            p = results[r] / float(len(wordsMatrix))
-            entropy = entropy - p * log2(p)
-        print "Out entropyForWords"
+            p = float(results[r]) / len(wordsMatrix)
+            entropy = entropy-p*log2(p)
+        #print "Out entropyForWords"
         return entropy
 
     def divideSet(self, rows, column, value):
-        print "In divideSet"
+        #print "In divideSet"
         split_function = None
         if isinstance(value,int): # check if the value is a number i.e int or float
                   split_function=lambda row:row[column]>=value
@@ -164,13 +161,13 @@ class spamClassification:
         # Divide the rows into two sets and return them
         set1=[row for row in rows if split_function(row)]
         set2=[row for row in rows if not split_function(row)]
-        print "NAHAR set1 set2 len", len(set1),len(set2)
-        print "Out divideSet"
+        #print "NAHAR set1 set2 len", len(set1),len(set2)
+        #print "Out divideSet"
         return (set1, set2)
 
     def buildTree(self, bestSets, scoref = entropyForWords ):
-        print "In buildTree"
-        print "ANAND",len(bestSets)
+        #print "In buildTree"
+        #print "ANAND",len(bestSets)
         if len(bestSets) == 0: 
             return spamClassification()
         current_score = scoref(self,bestSets)
@@ -180,14 +177,14 @@ class spamClassification:
         best_sets = None
 
         numberOfWords = len(bestSets[0]) - 1
-        print "NAHAR", numberOfWords
+        #print "NAHAR", numberOfWords
         
         for col in range(0, numberOfWords):
             words = {}
             for mail in bestSets:
                 words[mail[col]] = 1
             for value in words.keys():
-                print "ISHITA" , value
+                #print "ISHITA" , value
                 (set1, set2) = self.divideSet(bestSets, col, value)
                 p = float(len(set1)) / float(len(bestSets))
                 gain = current_score - p * scoref(self,set1) - (1 - p) * scoref(self,set2)
@@ -197,9 +194,9 @@ class spamClassification:
                     best_sets = (set1, set2)
 
         if best_gain > 0:
-            print "before true branch", best_sets[0]
+            #print "before true branch", best_sets[0]
             trueBranch = self.buildTree(best_sets[0])
-            print "before false branch", best_sets[1]
+            #print "before false branch", best_sets[1]
             falseBranch = self.buildTree(best_sets[1])
             return spamClassification(col = best_criteria[0], value = best_criteria[1],tb = trueBranch, fb = falseBranch)
         else:
@@ -207,14 +204,15 @@ class spamClassification:
 
 
     def classify(self, observation, tree):
-        print "In classify"
+        #print "In classify"
         if tree.results != None:
-            print "Out classify from if"
+            #print "Out classify from if"
             return tree.results
         else:
+            #print tree.col, len(observation)
             v = observation[tree.col]
             branch = None
-            print v, tree.value, tree.results, tree.tb, tree.fb, tree.col, observation[-1]
+            #print v, tree.value, tree.results, tree.tb, tree.fb, tree.col, observation[-1]
             if isinstance(v, int) or isinstance(v, float):
                 if v >= tree.value:
                     branch = tree.tb
@@ -225,11 +223,12 @@ class spamClassification:
                     branch = tree.tb
                 else:
                     branch = tree.fb
-            print "Out classify"
+            #print "Out classify"
             return self.classify(observation, branch)
 
     def testDecisionTree(self):
-        print "in testDecisionTree"
+        tempTree = self.buildTree(self.allWordsMatrix)
+        #print "in testDecisionTree"
         dirNSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
         dirSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
         mailList = []
@@ -240,21 +239,15 @@ class spamClassification:
                 mailList.append(newStr.split(' '))
         for mail in mailList:
             listIndex = []
-            flag  = 0
-            for word in self.totalWordsList:
-                for eachWord in mail:
-                    wordMail = eachWord.lower().translate(None, string.punctuation)
-                    if word == wordMail:
-                        flag = 1
-                        listIndex.append(1)
-                        break
-                if flag == 0:
-                    listIndex.append(0)
-
-            tempTree = self.buildTree(self.allWordsMatrix)
-            self.classify(listIndex, tempTree)
-            self.allWordsMatrix.append(listIndex)
-        print "out testDecisionTree"
+            listIndex = [0]*len(self.totalWordsList) 
+            for eachWord in mail:
+                lowerEachWord = eachWord.lower().translate(None, string.punctuation)
+                if lowerEachWord in self.totalWordsList:
+                    listIndex[self.totalWordsList.index(lowerEachWord)] = 1
+            abc = {}
+            abc = self.classify(listIndex, tempTree)
+            print(abc.keys())
+        #print "out testDecisionTree"
                 
     def calculateNaiveBayes(self, spamDict, notSpamDict, countSpam, countNSpam):
         mailList = []
