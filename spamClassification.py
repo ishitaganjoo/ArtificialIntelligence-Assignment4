@@ -377,13 +377,19 @@ stime = time.time()
 (mode, technique, dataDirectory, modelFile) = sys.argv[1:]
 if mode == 'train':
     spamObj = spamClassification()
-    spamObj.createDictionary
+    spamObj.createDictionary()
     #spamObj.createDictionary()
     pickle.dump(spamObj, open(modelFile, "wb"))
 elif mode == 'test':
     spamObj = pickle.load(open(modelFile, "rb"))
     spamObj.createDictionary()
-    spamObj.testDecisionTree()
+    if technique == 'bayes':
+        spamObj.calculateNaiveBayes()
+    elif technique == 'dt':
+        spamObj.testDecisionTree()
+    else:
+        print "Invalid Technique Name!"
+
 
 etime = time.time()
 print "time:",etime - stime
