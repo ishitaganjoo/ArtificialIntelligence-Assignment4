@@ -91,7 +91,7 @@ class spamClassification:
         self.topTenSpamCont  = defaultdict(int)
         self.leastTenSpamBinary = defaultdict(int)
         self.leastTenSpamCont = defaultdict(int)
-        self.stopWordList = ["from","to","a","an","the","is","subject","are","were","i","and", "", "of", "that", "in", "it", "not", "this", "be", "for", "as", "on", "if", "on", "my" ,"was", "we", "but", "he", "you", "have", "with", "by", "all", "or", "at", "me", "so", "can", "do", "2002", "id"]
+        self.stopWordList = ["from","to","a","an","the","is","subject","are","were","i","and", "", "of", "that", "in", "it", "not", "this", "be", "for", "as", "on", "if", "on", "my" ,"was", "we", "but", "he", "you", "have", "with", "by", "all", "or", "at", "me", "so", "can", "do", "2002", "id","yyyylocalhostexamplecom"]
         self.tree1 = None
         self.tree2 = None
 
@@ -153,7 +153,7 @@ class spamClassification:
         if mode == "bayes":
             self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
         else:
-            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 12]
+            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 20]
 
         self.decisionMatrix(dirSpam, dirNSpam, filePathTrNs, filePathTrS)
 
@@ -409,6 +409,7 @@ class spamClassification:
         confusionMatrix["spam"]["spam"] = accuracyCount
         confusionMatrix["spam"]["nonspam"] = testDocs - accuracyCount
 
+
         confusionMatrixCont["spam"]["spam"] = accuracyContinuous
         confusionMatrixCont["spam"]["nonspam"] = testDocs - accuracyContinuous
         
@@ -475,8 +476,9 @@ class spamClassification:
         confusionMatrix["nonspam"]["nonspam"] = accuracyCount
         confusionMatrix["nonspam"]["spam"] = testDocs - accuracyCount
 
-        confusionMatrix["nonspam"]["nonspam"] = accuracyContinuous
-        confusionMatrix["nonspam"]["spam"] = testDocs - accuracyContinuous
+
+        confusionMatrixCont["nonspam"]["nonspam"] = accuracyContinuous
+        confusionMatrixCont["nonspam"]["spam"] = testDocs - accuracyContinuous
 
         print "Accuracy for binary nonspam is", (accuracyCount/float(testDocs)) * 100
         print "Accuracy non continuous nonspam is", (accuracyContinuous/float(testDocs)) * 100
