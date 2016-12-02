@@ -88,7 +88,7 @@ class spamClassification:
         self.tree1 = None
         self.tree2 = None
 
-    def createDictionary(self,dataDirectory):
+    def createDictionary(self,dataDirectory,mode):
         self.countSpam,self.countNSpam = 0.0,0.0
         self.priorSpam,self.priorNSpam= 0.0,0.0
         filePathTrNs = dataDirectory + "/train/notspam"
@@ -143,7 +143,11 @@ class spamClassification:
         self.priorNSpam = self.countNSpam / float(self.countSpam + self.countNSpam)    
         
         #get the keyset of allWords dict to access each word in the dataset
-        self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
+        if mode == "bayes":
+            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
+        else:
+            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 12]
+
         self.decisionMatrix(dirSpam, dirNSpam, filePathTrNs, filePathTrS)
 
     def decisionMatrix(self, dirSpam, dirNSpam, filePathTrNs, filePathTrS):
@@ -461,8 +465,8 @@ class spamClassification:
         confusionMatrix["nonspam"]["nonspam"] = accuracyCount
         confusionMatrix["nonspam"]["spam"] = testDocs - accuracyCount
 
-        print "Accuracy for binary nonspam is", accuracyCount/float(testDocs) * 100
-        print "Accuracy non continuous nonspam is", accuracyContinuous/float(testDocs)
+        print "Accuracy for binary nonspam is", (accuracyCount/float(testDocs)) * 100
+        print "Accuracy non continuous nonspam is", (accuracyContinuous/float(testDocs)) * 100
         print " "
 
         print "" 
@@ -523,7 +527,7 @@ stime = time.time()
 (mode, technique, dataDirectory, modelFile) = sys.argv[1:]
 if mode == 'train':
     spamObj = spamClassification()
-    spamObj.createDictionary(dataDirectory)
+    spamObj.createDictionary(dataDirectory, mode)
     if technique == 'dt':
         spamObj.trainTrees()
     #spamObj.createDictionary()
