@@ -7,6 +7,29 @@ import sys
 import pickle
 import time
 
+# Naive Baye's Algorithm:
+# We start by creating a method 'createDictionary' , where we read both spam and non spam mails.
+# We start by reading non spam mails, create a dictionary notSpamDict to store the frequency of all the non spam words. Then we create another dictionary 
+# documentNSpamFreq which stores the occurence of unique words in non spam mails. Similarly, we create another dictionary allWordsDocFreq to sore the document 
+# frequency of both spam and non spam words.
+# Similarly, we read the spam mails, and create spamDict, documentSpamFreq to store the total word frequency and document frequency respectively.
+# Next, we calculate the priors and create a totalWordsList which contains all the words in allWordsDocFreq which have a document freq greater than 10.
+# We use the method 'calculateNaiveBayes' to calculate the accuracy of the bayes classifier for both spam and non spam mails.
+# In this method, we calculate the probability of a document being spam or non spam using the training data.
+# For binary model, we calculate the probability of a document being spam or non spam dividing the frequency of the word in all the training documents(spam, non spam)
+# by the total number of training documents(spam or non spam).
+# For continuous model, we calculate the probability of the document being spam or non spam by dividing the total frequency of the word in all training 
+# docs(spam, non spam) by the total number of words in the training data(spam, non spam).
+# For both spam and non spam mails, we calculate the accuracy by comparing the probability of spam and non spam for each mail, and accordingly we classify the mail.
+
+# Decision Tree Algorithm:
+# In the decision tree algorithm we find the best splits among the words. Our approach is that first we create a list of about 5000 most important words and then try
+# to find those words in every document, if the word is found in the document, then we set the flag to 1, else it is 0. This is for the binary case and for the
+# continuous we keep track of the frequency of the the words in our list and see how many times they occur in the particular document or the mail. And based on this
+# matrix, we decide the best split of our data by calculating entropy for each split and selecting the split which gives the min entropy and based on thay split,
+# we recursively call our tree on that split and try to find the next best split. We continue this procedure until we can say that no more split is possible and 
+# we can classify our document as spam or non spam.
+  
 class spamClassification:
     def __init__(self, col=-1, value = None, results= None, tb= None, fb = None):
         self.priorSpam = 0.0
@@ -26,19 +49,21 @@ class spamClassification:
         self.results = results
         self.tb = tb
         self.fb = fb
+	self.countSpam = 0.0
+	self.countNSpam = 0.0
         self.stopWordList = ['from', 'to', 'a', 'an', 'subject', 'are', 'were', 'is', 'the']
 
     def createDictionary(self):
-        countSpam,countNSpam = 0.0,0.0
-        priorSpam,priorNSpam= 0.0,0.0
-        dirNSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
-        dirSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
+        self.countSpam,self.countNSpam = 0.0,0.0
+        self.priorSpam,self.priorNSpam= 0.0,0.0
+        dirNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam")
+        dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam")
         
         mailList= []
         
         for fileName in dirNSpam:
-            countNSpam += 1
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam/"+fileName, "r") as f:
+            self.countNSpam += 1
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -58,8 +83,8 @@ class spamClassification:
 
         mailList = []
         for fileName in dirSpam:
-            countSpam += 1
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam/"+fileName, "r") as f:
+            self.countSpam += 1
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -77,8 +102,8 @@ class spamClassification:
                 self.documentSpamFreq[newWord] += 1
                 self.allWordsDocFreq[newWord] += 1    
 
-        self.priorSpam = countSpam / float(countSpam + countNSpam)
-        self.priorNSpam = countNSpam / float(countSpam + countNSpam)    
+        self.priorSpam = self.countSpam / float(self.countSpam + self.countNSpam)
+        self.priorNSpam = self.countNSpam / float(self.countSpam + self.countNSpam)    
         
         #get the keyset of allWords dict to access each word in the dataset
         self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
@@ -87,7 +112,7 @@ class spamClassification:
     def decisionMatrix(self, dirSpam, dirNSpam):
         mailList = []
         for fileName in dirSpam: 
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/spam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -110,7 +135,7 @@ class spamClassification:
 
         mailList = []
         for fileName in dirNSpam:
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/train/notspam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -213,15 +238,15 @@ class spamClassification:
     def testDecisionTree(self):
         tempTree= self.constructDecTree(self.allWordsMatrix)
         tempTreeCont = self.constructDecTree(self.totalWordsMatrix)
-        dirNSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
-        dirSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+        dirNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
+        dirSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
         mailList = []
         totalCountSpam = 0
         countSpam = 0
         countSpamCont = 0
         for fileName in dirSpam:
             totalCountSpam += 1
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -248,7 +273,7 @@ class spamClassification:
         countNSpamCont = 0
         for fileName in dirNSpam:
             totalCountNSpam += 1
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -275,10 +300,10 @@ class spamClassification:
         print "Spam Accuracy Cont:", countSpamCont/float(totalCountSpam)
         print "Not Spam Accuracy Cont:", countNSpamCont/float(totalCountNSpam)
                 
-    def calculateNaiveBayes(self, spamDict, notSpamDict, countSpam, countNSpam):
+    def calculateNaiveBayes(self):
         mailList = []
         
-        dirTestSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
+        dirTestSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam")
         testDocs = 0.0
         accuracyCount = 0.0
         accuracyContinuous = 0.0
@@ -289,7 +314,7 @@ class spamClassification:
             probNSpam = 0.0
             probSpamCont = 0.0
             probNSpamCont = 0.0
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/spam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
@@ -299,11 +324,11 @@ class spamClassification:
                     lowerEachWord = eachWord.lower().translate(None, string.punctuation)
                     #for binary
                     if(self.documentSpamFreq.get(lowerEachWord) != None):
-                        probSpam += math.log(float(self.documentSpamFreq[lowerEachWord])/float(countSpam))
+                        probSpam += math.log(float(self.documentSpamFreq[lowerEachWord])/float(self.countSpam))
                     else:
                         probSpam += math.log(1e-9)
                     if(self.documentNSpamFreq.get(lowerEachWord) != None):
-                        probNSpam += math.log(float(self.documentNSpamFreq[lowerEachWord]) / float(countNSpam))
+                        probNSpam += math.log(float(self.documentNSpamFreq[lowerEachWord]) / float(self.countNSpam))
                     else:
                         probNSpam += math.log(1e-9)
                     if(self.spamDict.get(lowerEachWord) != None):
@@ -325,7 +350,7 @@ class spamClassification:
         print("Accuracy for spam is", accuracyCount/testDocs)
         print "Accuracy for continuous spam is", accuracyContinuous/testDocs
                 
-        dirTestNSpam = os.listdir("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
+        dirTestNSpam = os.listdir("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam")
         testDocs = 0.0
         accuracyCount = 0.0
         accuracyContinuous = 0.0
@@ -336,20 +361,20 @@ class spamClassification:
             probSpam = 0.0
             probSpamCont = 0.0
             probNSpamCont = 0.0
-            with open("/u/anahar/fall2016/artificialIntelligence/assign4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
+            with open("/u/bansalro/csci_b551_assignment_4/anahar-bansalro-iganjoo-a4/part1/part1/test/notspam/"+fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
                 mailList.append(newStr.split(' '))
                 spamDictSum = sum(self.spamDict.values())
                 notSpamDictSum = sum(self.notSpamDict.values())
-                for lowerEachWord in mailList[0]:
+                for eachWord in mailList[0]:
                     lowerEachWord = eachWord.lower().translate(None, string.punctuation)
                     if(self.documentNSpamFreq.get(lowerEachWord) != None):
-                        probNSpam += math.log(float(self.documentNSpamFreq[lowerEachWord])/float(countSpam))
+                        probNSpam += math.log(float(self.documentNSpamFreq[lowerEachWord])/float(self.countSpam))
                     else:
                         probNSpam += math.log(1e-9)
                     if(self.documentSpamFreq.get(lowerEachWord) != None):
-                        probSpam += math.log(float(self.documentSpamFreq[lowerEachWord]) / float(countNSpam))
+                        probSpam += math.log(float(self.documentSpamFreq[lowerEachWord]) / float(self.countNSpam))
                     else:
                         probSpam += math.log(1e-9)
                     if(self.spamDict.get(lowerEachWord) != None):
@@ -377,13 +402,19 @@ stime = time.time()
 (mode, technique, dataDirectory, modelFile) = sys.argv[1:]
 if mode == 'train':
     spamObj = spamClassification()
-    spamObj.createDictionary
+    spamObj.createDictionary()
     #spamObj.createDictionary()
     pickle.dump(spamObj, open(modelFile, "wb"))
 elif mode == 'test':
     spamObj = pickle.load(open(modelFile, "rb"))
-    spamObj.createDictionary()
-    spamObj.testDecisionTree()
+    #spamObj.createDictionary()
+    if technique == 'bayes':
+        spamObj.calculateNaiveBayes()
+    elif technique == 'dt':
+        spamObj.testDecisionTree()
+    else:
+        print "Invalid Technique Name!"
+
 
 etime = time.time()
 print "time:",etime - stime
