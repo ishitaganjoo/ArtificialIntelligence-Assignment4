@@ -54,6 +54,13 @@ import heapq
 # We recursively call our tree on that split and try to find the next best split. We continue this
 # procedure until we can say that no more split is possible and we can classify our document as 
 # spam or non spam.
+#
+#Output:
+#   Naive bayes:
+#       We are generating the list of words in test phase since we are calculating the
+#       posterior to get the desired wordsA
+#   Decision Tree:
+#       the tree is generated during the train phase
 ######################################################################################################
 
 def dd():
@@ -84,7 +91,7 @@ class spamClassification:
         self.topTenSpamCont  = defaultdict(int)
         self.leastTenSpamBinary = defaultdict(int)
         self.leastTenSpamCont = defaultdict(int)
-        self.stopWordList = ["from","to","a","an","the","is","subject","are","were","i","and", "", "of", "that", "in", "it", "not", "this", "be", "for", "as", "on", "if", "on", "my" ,"was", "we", "but", "he", "you", "have", "with", "by", "all", "or", "at", "me", "so", "can", "do", "2002"]
+        self.stopWordList = ["from","to","a","an","the","is","subject","are","were","i","and", "", "of", "that", "in", "it", "not", "this", "be", "for", "as", "on", "if", "on", "my" ,"was", "we", "but", "he", "you", "have", "with", "by", "all", "or", "at", "me", "so", "can", "do", "2002", "id"]
         self.tree1 = None
         self.tree2 = None
 
@@ -401,6 +408,9 @@ class spamClassification:
 
         confusionMatrix["spam"]["spam"] = accuracyCount
         confusionMatrix["spam"]["nonspam"] = testDocs - accuracyCount
+
+        confusionMatrixCont["spam"]["spam"] = accuracyContinuous
+        confusionMatrixCont["spam"]["nonspam"] = testDocs - accuracyContinuous
         
         print "In Naive Bayes:"
         print "Accuracy for binary spam is", (accuracyCount/float (testDocs)) * 100
@@ -464,6 +474,9 @@ class spamClassification:
 
         confusionMatrix["nonspam"]["nonspam"] = accuracyCount
         confusionMatrix["nonspam"]["spam"] = testDocs - accuracyCount
+
+        confusionMatrix["nonspam"]["nonspam"] = accuracyContinuous
+        confusionMatrix["nonspam"]["spam"] = testDocs - accuracyContinuous
 
         print "Accuracy for binary nonspam is", (accuracyCount/float(testDocs)) * 100
         print "Accuracy non continuous nonspam is", (accuracyContinuous/float(testDocs)) * 100
