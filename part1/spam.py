@@ -61,6 +61,10 @@ import heapq
 #       posterior to get the desired wordsA
 #   Decision Tree:
 #       the tree is generated during the train phase
+#
+# References:
+# For constructing the decision trees, we took help from the following website
+# http://www2.cs.uregina.ca/~dbd/cs831/notes/ml/dtrees/4_dtrees2.html
 ######################################################################################################
 
 def dd():
@@ -110,7 +114,7 @@ class spamClassification:
             with open(filePathTrNs + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             uniqueWords = []
             for eachWord in mail:
@@ -131,7 +135,7 @@ class spamClassification:
             with open(filePathTrS + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             uniqueWords = []
             for eachWord in mail:
@@ -153,7 +157,7 @@ class spamClassification:
         if mode == "bayes":
             self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 10]
         else:
-            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 20]
+            self.totalWordsList  = [i for i in self.allWordsDocFreq if self.allWordsDocFreq[i] > 12]
 
         self.decisionMatrix(dirSpam, dirNSpam, filePathTrNs, filePathTrS)
 
@@ -163,7 +167,7 @@ class spamClassification:
             with open(filePathTrS + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             listIndex = []
             listIndexContinuous = []
@@ -172,9 +176,13 @@ class spamClassification:
             flag  = 0
             for eachWord in mail:
                 lowerEachWord = eachWord.lower().translate(None, string.punctuation)
-                if lowerEachWord in self.totalWordsList:
-                    listIndex[self.totalWordsList.index(lowerEachWord)] = 1
-                    listIndexContinuous[self.totalWordsList.index(lowerEachWord)] += 1
+		if len(lowerEachWord) < 10:
+		#if 1:
+                	if lowerEachWord in self.totalWordsList:
+				#if(len(lowerEachWord) == 15):
+					#print("Spam",lowerEachWord)
+                    		listIndex[self.totalWordsList.index(lowerEachWord)] = 1
+                    		listIndexContinuous[self.totalWordsList.index(lowerEachWord)] += 1
 
             listIndex.append('spam')
             listIndexContinuous.append('spam')
@@ -186,7 +194,7 @@ class spamClassification:
             with open(filePathTrNs + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             listIndex = []
             listIndex = [0]*(len(self.totalWordsList) + 1)
@@ -194,9 +202,13 @@ class spamClassification:
             listIndexContinuous = [0]*(len(self.totalWordsList) + 1)
             for eachWord in mail:
                 lowerEachWord = eachWord.lower().translate(None, string.punctuation)
-                if lowerEachWord in self.totalWordsList:
-                    listIndex[self.totalWordsList.index(lowerEachWord)] = 1
-                    listIndexContinuous[self.totalWordsList.index(lowerEachWord)] += 1
+		if len(lowerEachWord) < 10:
+		#if 1:
+                	if lowerEachWord in self.totalWordsList:
+				#if(len(lowerEachWord)== 14):
+					#print("NotSpam",lowerEachWord)
+                    		listIndex[self.totalWordsList.index(lowerEachWord)] = 1
+                    		listIndexContinuous[self.totalWordsList.index(lowerEachWord)] += 1
 
             listIndex.append('notspam')
             listIndexContinuous.append('notspam')
@@ -212,13 +224,10 @@ class spamClassification:
         return solution
 
     def entropyForWords(self, wordsMatrix):
-        #from math import log
-        #log2=lambda x:log(x)/log(2)
         solution = self.entropyCalculate(wordsMatrix)
         entropy = 0.0
-        for idx in solution.keys():
+        for idx in solution:
             ans = float(solution[idx]) / len(wordsMatrix)
-            #entropy = entropy - ans * log2(ans)
             entropy = entropy - ans * math.log(ans)
         return entropy
 
@@ -236,17 +245,16 @@ class spamClassification:
             return spamClassification()
         splitEntropy = self.entropyForWords(optSplit)
         
+        numberOfWords = len(optSplit[0]) - 1
         optInfoGain = 0.0
         optInfoCri = None
         optSets = None
-
-        numberOfWords = len(optSplit[0]) - 1
         
         for col in range(0, numberOfWords):
             words = {}
             for mail in optSplit:
                 words[mail[col]] = 1
-            for value in words.keys():
+            for value in words:
                 (splitLeft, splitRight) = self.splitOnWords(optSplit, col, value)
                 ans = float(len(splitLeft)) / float(len(optSplit))
                 currVal = splitEntropy - ans * self.entropyForWords(splitLeft) - (1 - ans) * self.entropyForWords(splitRight)
@@ -290,7 +298,7 @@ class spamClassification:
             with open(filePathTeS + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             listIndex = []
             listIndexCont = []
@@ -299,8 +307,8 @@ class spamClassification:
             for eachWord in mail:
                 lowerEachWord = eachWord.lower().translate(None, string.punctuation)
                 if lowerEachWord in self.totalWordsList:
-                    listIndex[self.totalWordsList.index(lowerEachWord)] = 1
-                    listIndexCont[self.totalWordsList.index(lowerEachWord)] += 1
+                    	listIndex[self.totalWordsList.index(lowerEachWord)] = 1
+                    	listIndexCont[self.totalWordsList.index(lowerEachWord)] += 1
             res = self.assignLabels(listIndex, tempTree)
             resCont = self.assignLabels(listIndexCont, tempTreeCont)
             if res.keys()[0] == "spam":
@@ -317,7 +325,7 @@ class spamClassification:
             with open(filePathTeNs + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
         for mail in mailList:
             listIndex = []
             listIndexCont = []
@@ -365,7 +373,7 @@ class spamClassification:
             with open(filePathTeS + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
                 spamDictSum = sum(self.spamDict.values())
                 notSpamDictSum = sum(self.notSpamDict.values())
                 for eachWord in mailList[0]:
@@ -432,7 +440,7 @@ class spamClassification:
             with open(filePathTeNs + "/" + fileName, "r") as f:
                 content = f.readlines()
                 newStr = "".join(content)
-                mailList.append(newStr.split(' '))
+                mailList.append(newStr.split())
                 spamDictSum = sum(self.spamDict.values())
                 notSpamDictSum = sum(self.notSpamDict.values())
                 for eachWord in mailList[0]:
@@ -542,7 +550,7 @@ stime = time.time()
 (mode, technique, dataDirectory, modelFile) = sys.argv[1:]
 if mode == 'train':
     spamObj = spamClassification()
-    spamObj.createDictionary(dataDirectory, mode)
+    spamObj.createDictionary(dataDirectory, technique)
     if technique == 'dt':
         spamObj.trainTrees()
     #spamObj.createDictionary()
